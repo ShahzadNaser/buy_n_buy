@@ -29,7 +29,10 @@ app_license = "MIT"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+    "Sales Order" : "public/js/sales_order.js",
+    "Purchase Order" : "public/js/purchase_order.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -102,13 +105,11 @@ app_license = "MIT"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-#	"*": {
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Purchase Order": {
+		"on_submit": "buy_n_buy.events.events.make_new_batch",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -139,9 +140,10 @@ app_license = "MIT"
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-#	"frappe.desk.doctype.event.event.get_events": "buy_n_buy.event.get_events"
-# }
+override_whitelisted_methods = {
+	"erpnext.selling.doctype.sales_order.sales_order.make_delivery_note": "buy_n_buy.events.sales_order.make_delivery_note",
+	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "buy_n_buy.events.purchase_order.make_purchase_receipt"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
