@@ -15,9 +15,9 @@ def ping():
 @frappe.whitelist()
 def make_new_batch(doc,method):
     for item in doc.get("items"):
-        if not frappe.db.exists("Batch",item.get("batch_no")):
+        if not frappe.db.exists("Batch",item.get("batch_number")):
             batch = frappe.new_doc("Batch")
-            batch.batch_id = item.get("batch_no")
+            batch.batch_id = item.get("batch_number")
             batch.item = item.get("item_code")
             batch.flags.ignore_permissions = 1
             batch.insert()
