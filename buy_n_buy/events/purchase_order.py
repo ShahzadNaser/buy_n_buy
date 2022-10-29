@@ -33,7 +33,7 @@ def make_purchase_receipt(source_name, target_doc=None):
                     "name": "purchase_order_item",
                     "parent": "purchase_order",
                     "bom": "bom",
-                    "batch_no": "batch_no",
+                    "batch_number": "batch_no",
                     "material_request": "material_request",
                     "material_request_item": "material_request_item",
                 },
