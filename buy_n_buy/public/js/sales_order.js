@@ -40,7 +40,9 @@ frappe.ui.form.on('Sales Order Item', {
             method: "buy_n_buy.events.events.get_item_details",
             child: item,
             args: {
-                "item_code": item.item_code
+                "item_code": item.item_code,
+                "warehouse": frm.doc.set_warehouse || ""
+
             },
             callback: function(r) {
                 if(r.message){

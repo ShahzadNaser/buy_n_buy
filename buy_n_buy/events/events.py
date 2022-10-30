@@ -1,12 +1,16 @@
 import frappe
+from erpnext.stock.doctype.batch.batch import get_batch_no
 
 @frappe.whitelist()
-def get_item_details(item_code=None):
-    print(item_code)
+def get_item_details(item_code=None, warehouse=None):
+    print(item_code,warehouse)
     if not item_code:
         return False
-
-    return frappe.db.get_value("UOM Conversion Detail",{"parent":item_code,"uom":"Box"},["conversion_factor","cbm_1","cbm_2","cbm_3"],as_dict=True)
+    result = frappe.db.get_value("UOM Conversion Detail",{"parent":item_code,"uom":"Box"},["conversion_factor","cbm_1","cbm_2","cbm_3"],as_dict=True)
+    if warehouse:
+        result["batch_no"] = get_batch_no(item_code,warehouse,1,throw=False)
+    print(result)
+    return result
 
 @frappe.whitelist()
 def ping():

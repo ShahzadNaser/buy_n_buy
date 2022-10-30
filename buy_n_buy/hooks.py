@@ -142,7 +142,8 @@ doc_events = {
 #
 override_whitelisted_methods = {
 	"erpnext.selling.doctype.sales_order.sales_order.make_delivery_note": "buy_n_buy.events.sales_order.make_delivery_note",
-	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "buy_n_buy.events.purchase_order.make_purchase_receipt"
+	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt": "buy_n_buy.events.purchase_order.make_purchase_receipt",
+	"frappe.desk.search.search_link": "buy_n_buy.events.search.search_link"
 }
 #
 # each overriding function accepts a `data` argument;
