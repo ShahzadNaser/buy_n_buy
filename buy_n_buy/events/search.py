@@ -29,8 +29,8 @@ def search_link(
         temp_list = list(frappe.response["values"])
         for index,item in enumerate(temp_list):
             item = [item[0]]
-            item.append( frappe.db.get_value("Sales Order Item",{"item_code":item[0]},"rate") or frappe.db.get_value("Item",item[0],"valuation_rate") or 0)
-            item.append(frappe.db.get_value("Purchase Order Item",{"item_code":item[0]},"rate") or frappe.db.get_value("Item",item[0],"valuation_rate") or "0")
+            item.append("{}{}".format("Last SP: ",frappe.db.get_value("Sales Order Item",{"item_code":item[0]},"rate") or frappe.db.get_value("Item",item[0],"valuation_rate") or 0))
+            item.append("{}{}".format("Last PP: ",frappe.db.get_value("Purchase Order Item",{"item_code":item[0]},"rate") or frappe.db.get_value("Item",item[0],"valuation_rate") or "0"))
             temp_list[index] = tuple(item)
         frappe.response["values"] = tuple(temp_list)
 
