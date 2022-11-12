@@ -16,7 +16,7 @@ def execute(filters=None):
 			"width": 100,
 		},
 		{
-			"label": _("Sales Order"),
+			"label": _("Reference No."),
 			"fieldtype": "Data",
 			"fieldname": "so",
 			"width": 180,
@@ -59,7 +59,7 @@ def execute(filters=None):
 			"width": 140,
 		},
 		{
-			"label": _("Receiveable"),
+			"label": _("Balance"),
 			"fieldtype": "Currency",
 			"fieldname": "balance",
 			"width": 140,
@@ -103,45 +103,35 @@ def get_date(filters):
 		"credit":"",
 		"balance":opening
 	})
-	empty_row = frappe._dict({
-		"posting_date": "",
-		"so": '',
-		"item": "",
-		"qty": "",
-		"rate": "",
-		"amount": "",
-		"debit": "",
-		"credit":"",
-		"balance":""
-	})
-
 	data.append(opening_row)
 
 	sales_orders = get_sales_orders(filters)
 	temp_orders = []
-	outsanding_orders = get_outstanding_invoices(filters)
-	for row in sales_orders:
-		if row.get("sales_order") not in temp_orders:
-			temp_orders.append(row.get("sales_order"))
-			data.append(empty_row)
-			
-			credit = flt(row.get("debit")) - flt(outsanding_orders.get(row.get("sales_order")) or row.get("debit"))
-			closing += flt(row.get("debit") or 0) - flt(credit)
+	# outsanding_orders = get_outstanding_invoices(filters)
+	payments = get_payments(filters)
 
-			data.append(new_so_row(row.get("posting_date"), row.get("sales_order"), credit, row.get("debit"), closing))
+	transaction =  sorted(sales_orders + payments, key=lambda d: d['posting_date']) 
+
+	for row in transaction:
+		if row.get("sales_order") not in temp_orders:
+			closing = closing +(flt(row.get("debit") or 0) - flt(row.get("credit") or 0))
+
 		data.append(
 			frappe._dict({
-				"posting_date": "",
-				"so": "",
-				"item": row.get("item_code"),
-				"qty": row.get("qty"),
-				"rate": row.get("rate"),
-				"amount": row.get("amount"),
-				"debit": "",
-				"credit":"",
-				"balance":""
+				"posting_date": row.get("posting_date") if row.get("sales_order") not in temp_orders else "",
+				"so": row.get("sales_order") if row.get("sales_order") not in temp_orders else "",
+				"item": row.get("item_code") or "",
+				"qty": row.get("qty") or "",
+				"rate": row.get("rate") or "",
+				"amount": row.get("amount") or "",
+				"debit": row.get("debit") if row.get("sales_order") not in temp_orders else "",
+				"credit":row.get("credit") if row.get("sales_order") not in temp_orders else "",
+				"balance": closing if row.get("sales_order") not in temp_orders else ""
 			})
 		)		
+		if row.get("sales_order") not in temp_orders:
+			temp_orders.append(row.get("sales_order"))
+
 
 	closing_row = frappe._dict({
 		"posting_date": "",
@@ -155,9 +145,7 @@ def get_date(filters):
 		"balance":closing
 	})
 
-	data.append(empty_row)
 	data.append(closing_row)
-	data.append(empty_row)
  
 	return data
 
@@ -185,7 +173,8 @@ def get_sales_orders(filters):
 			soi.qty,
 			soi.rate,
 			soi.amount,
-			so.rounded_total as debit
+			so.rounded_total as debit,
+			0 as credit
 		FROM
 			`tabSales Order` so
 		LEFT JOIN
@@ -193,7 +182,7 @@ def get_sales_orders(filters):
 			ON 
 				soi.parent = so.name
 		WHERE
-			so.customer = '{}' AND so.transaction_date between '{}' AND '{}' and so.docstatus = 1
+			so.customer = '{}' AND so.transaction_date between '{}' AND '{}' and so.docstatus  < 2
 		GROUP BY
 			so.name, soi.name
 		ORDER BY 
@@ -224,3 +213,21 @@ def get_outstanding_invoices(filters):
     for row in orders:
         outstanding_balances[row.get("sales_order")] = flt(row.get("outstanding_amount") or 0)
     return outstanding_balances
+
+def get_payments(filters):
+    return frappe.db.sql(
+	"""
+		SELECT
+			pe.name as sales_order,
+			pe.posting_date ,
+			0 as debit,
+			pe.paid_amount as credit
+		FROM
+			`tabPayment Entry` pe
+		WHERE
+			pe.party = '{}' AND pe.posting_date between '{}' AND '{}' and pe.docstatus  = 1
+		ORDER BY
+			posting_date asc		
+	""".format(filters.get("customer"), filters.get("from_date"),filters.get("to_date")),
+		as_dict=True
+	)

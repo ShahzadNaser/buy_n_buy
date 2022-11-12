@@ -52,6 +52,7 @@ frappe.ui.form.on('Sales Order Item', {
                     var boxes = flt(1/r.message.conversion_factor);
                     frappe.model.set_value(item.doctype, item.name,"con_fact",flt(r.message.conversion_factor));
                     frappe.model.set_value(item.doctype, item.name,"boxes",boxes);
+                    frappe.model.set_value(item.doctype, item.name,"stock_qty1",r.message.actual_qty);
                     if((r.message.cbm_1 || 0) * (r.message.cbm_2 || 0) * (r.message.cbm_3 || 0) > 0){
                         var per_ctn_cbm = flt((r.message.cbm_1 || 0) * (r.message.cbm_2 || 0) * (r.message.cbm_3 || 0)/1000000 );
                         frappe.model.set_value(item.doctype, item.name,"per_ctn_cbm", per_ctn_cbm);
