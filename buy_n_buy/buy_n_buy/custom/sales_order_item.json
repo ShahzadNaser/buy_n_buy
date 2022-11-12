@@ -515,7 +515,7 @@
    "insert_after": "qty",
    "is_system_generated": 0,
    "is_virtual": 0,
-   "label": "Stock QTY",
+   "label": "Stock Balance",
    "length": 0,
    "mandatory_depends_on": null,
    "modified": "2022-11-12 08:23:24.178362",
