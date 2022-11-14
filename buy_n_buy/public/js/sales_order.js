@@ -30,18 +30,15 @@ frappe.ui.form.on('Sales Order', {
 			}
 		}
           });
-    }
-});
-frappe.ui.form.on('Sales Order Item', {
-	item_code: function(frm,cdt, cdn) {
-        console.log(cdt, cdn);
-		var item = frappe.get_doc(cdt, cdn);
-        return frm.call({
+    },
+    update_item_details: function(item){
+        console.log(item);
+        return cur_frm.call({
             method: "buy_n_buy.events.events.get_item_details",
             child: item,
             args: {
                 "item_code": item.item_code,
-                "warehouse": frm.doc.set_warehouse || ""
+                "warehouse": item.warehouse || cur_frm.doc.set_warehouse || ""
 
             },
             callback: function(r) {
@@ -49,7 +46,7 @@ frappe.ui.form.on('Sales Order Item', {
                     frappe.model.set_value(item.doctype, item.name,"cbm_1", flt(r.message.cbm_1));
                     frappe.model.set_value(item.doctype, item.name,"cbm_2", flt(r.message.cbm_2));
                     frappe.model.set_value(item.doctype, item.name,"cbm_3", flt(r.message.cbm_3));
-                    var boxes = flt(1/r.message.conversion_factor);
+                    var boxes = flt((item.qty || 1)/r.message.conversion_factor);
                     frappe.model.set_value(item.doctype, item.name,"con_fact",flt(r.message.conversion_factor));
                     frappe.model.set_value(item.doctype, item.name,"boxes",boxes);
                     frappe.model.set_value(item.doctype, item.name,"stock_qty1",r.message.actual_qty);
@@ -61,6 +58,13 @@ frappe.ui.form.on('Sales Order Item', {
                 }
             }
         });
+
+    }
+});
+frappe.ui.form.on('Sales Order Item', {
+	item_code: function(frm,cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
+        frm.events.update_item_details(item)
     },
     qty: function(frm, cdt, cdn){
 		var item = frappe.get_doc(cdt, cdn);
@@ -79,6 +83,9 @@ frappe.ui.form.on('Sales Order Item', {
         frappe.model.set_value(item.doctype, item.name,"total_cbm", flt(per_ctn_cbm * item.boxes));
 
         frappe.model.set_value(item.doctype, item.name,"qty",qty);
+    },
+    warehouse: function(frm, cdt,cdn){
+		var item = frappe.get_doc(cdt, cdn);
+        frm.events.update_item_details(item)
     }
-
 });

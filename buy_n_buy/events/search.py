@@ -25,7 +25,7 @@ def search_link(
         ignore_user_permissions=ignore_user_permissions,
     )
 
-    if reference_doctype and reference_doctype == "Sales Order Item":
+    if reference_doctype and reference_doctype == "Sales Order Item" and doctype == "Item":
         temp_list = list(frappe.response["values"])
         for index,item in enumerate(temp_list):
             item = [item[0]]
