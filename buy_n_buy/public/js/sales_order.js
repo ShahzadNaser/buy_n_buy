@@ -87,5 +87,9 @@ frappe.ui.form.on('Sales Order Item', {
     warehouse: function(frm, cdt,cdn){
 		var item = frappe.get_doc(cdt, cdn);
         frm.events.update_item_details(item)
+    },
+    delivery_warehouse: function(frm, cdt,cdn){
+		var item = frappe.get_doc(cdt, cdn);
+        frappe.model.set_value(cdt, cdn,"warehouse",item.delivery_warehouse);
     }
 });
