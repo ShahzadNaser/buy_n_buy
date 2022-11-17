@@ -4,7 +4,7 @@ buy_n_buy
 
 
 
-# Buy N Buy Custom Feature for ERPnext App
+# Buy N Buy Custom Feature for ERPnext
 
 
 # `Installation:`
