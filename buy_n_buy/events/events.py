@@ -5,7 +5,7 @@ from erpnext.stock.doctype.batch.batch import get_batch_no
 def get_item_details(item_code=None, warehouse=None):
     if not item_code:
         return False
-    result = frappe.db.get_value("UOM Conversion Detail",{"parent":item_code,"uom":"Box"},["conversion_factor","cbm_1","cbm_2","cbm_3"],as_dict=True)
+    result = frappe.db.get_value("UOM Conversion Detail",{"parent":item_code,"uom":"Box"},["conversion_factor as fac","cbm_1","cbm_2","cbm_3"],as_dict=True)
     where = " item_code = '{}'".format(item_code)
     if warehouse:
         result["batch_no"] = get_batch_no(item_code,warehouse,1,throw=False)

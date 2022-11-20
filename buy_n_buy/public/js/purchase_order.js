@@ -13,8 +13,8 @@ frappe.ui.form.on('Purchase Order Item', {
                     frappe.model.set_value(item.doctype, item.name,"cbm_1", flt(r.message.cbm_1));
                     frappe.model.set_value(item.doctype, item.name,"cbm_2", flt(r.message.cbm_2));
                     frappe.model.set_value(item.doctype, item.name,"cbm_3", flt(r.message.cbm_3));
-                    var boxes = flt(1/r.message.conversion_factor);
-                    frappe.model.set_value(item.doctype, item.name,"con_fact",flt(r.message.conversion_factor));
+                    var boxes = flt(1/r.message.fac);
+                    frappe.model.set_value(item.doctype, item.name,"con_fact",flt(r.message.fac));
                     frappe.model.set_value(item.doctype, item.name,"boxes",boxes);
                     if((r.message.cbm_1 || 0) * (r.message.cbm_2 || 0) * (r.message.cbm_3 || 0) > 0){
                         var per_ctn_cbm = flt((r.message.cbm_1 || 0) * (r.message.cbm_2 || 0) * (r.message.cbm_3 || 0)/1000000 );
