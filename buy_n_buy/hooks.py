@@ -108,6 +108,9 @@ doctype_js = {
 doc_events = {
 	"Purchase Order": {
 		"on_submit": "buy_n_buy.events.events.make_new_batch",
+	},
+	"Customer": {
+		"before_save": "buy_n_buy.events.customer.before_save",
 	}
 }
 
