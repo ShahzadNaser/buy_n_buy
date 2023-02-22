@@ -35,6 +35,12 @@ def execute(filters=None):
 			"width": 180,
 		},
 		{
+			"label": _("Party Type"),
+			"fieldtype": "Data",
+			"fieldname": "party_type",
+			"width": 100,
+		},
+		{
 			"label": _("Item"),
 			"fieldtype": "Link",
 			"fieldname": "item",
@@ -77,13 +83,15 @@ def execute(filters=None):
 			"fieldname": "balance",
 			"width": 140,
 		}
-	]    
-	data = get_date(filters)
+	]
+	data = get_data(filters)
 	return columns, data
 
-def get_date(filters):
+def get_data(filters):
 	sinvoices = get_sales_invoices(filters)
-	supplier = frappe.db.get_value("Customer",filters.get("party"),"supplier") or ""
+	supplier = ""
+	if filters.get("include_supplier"):
+		supplier = frappe.db.get_value("Customer",filters.get("party"),"supplier") or ""
 	purchase_invoices = get_purchase_invoices(filters, supplier)
 	invoices = ChainMap(sinvoices, purchase_invoices) 
 	filters["group_by"] = "Group by Voucher (Consolidated)"
@@ -93,6 +101,7 @@ def get_date(filters):
  	
 	data = []
 	columns, tdata = get_gl(filters)
+	print(tdata)
 	pdata= [{}]
 
 	if filters["party_type"] == "Customer" and supplier:
@@ -102,7 +111,8 @@ def get_date(filters):
 	transactions = pdata + tdata
 	sfirst = tdata[0]
 	pfirst = pdata[0]
-	opening_balance = {"debit":sfirst.get("balance") or 0,"credit":pfirst.get("balance") or 0,"balance":(sfirst.get("balance") or 0) - (pfirst.get("balance") or 0)}
+	opening_balance = {"debit":sfirst.get("balance") or 0,"credit":pfirst.get("balance") or 0,"balance":(sfirst.get("balance") or 0) - abs(pfirst.get("balance") or 0)}
+	cur_balance = (sfirst.get("balance") or 0) - abs(pfirst.get("balance") or 0)
 	closing_balance = {"debit":opening_balance.get("debit") or 0,"credit":opening_balance.get("credit") or 0,"balance":opening_balance.get("balance") or 0}
 
 	transactions =  sorted(tdata + pdata, key=lambda d: d.get('posting_date') or getdate("2000-10-10") )
@@ -122,17 +132,22 @@ def get_date(filters):
 	)
 	for row in transactions:
 		if row.get("posting_date"):
+			closing_balance["debit"] += row.get("debit")
+			closing_balance["credit"] += row.get("credit")
+			closing_balance["balance"] +=  (row.get("debit") - abs(row.get("credit")))
+
 			temp_row = frappe._dict({
 				"posting_date": row.get("posting_date"),
 				"voucher_type": "" if row.get("account") in ['Opening','Total','Closing (Opening + Total)'] else row.get("voucher_type"),
 				"voucher_no":  row.get("voucher_no") or row.get("account"),
+				"party_type": row.get("party_type"),
 				"item": "",
 				"qty": "",
 				"rate": "",
 				"amount": "",
 				"debit": row.get("debit"),
 				"credit":row.get("credit"),
-				"balance":row.get("balance")
+				"balance":closing_balance["balance"]
 			})
 			first = True
 			if(row.get("voucher_no") and row.get("voucher_no") in invoices):
@@ -140,9 +155,6 @@ def get_date(filters):
 					if first:
 						child_row = temp_row
 						child_row.update(trow)
-						closing_balance["debit"] += row.get("debit")
-						closing_balance["credit"] += row.get("credit")
-						closing_balance["balance"] +=  (row.get("debit") - row.get("credit"))
 					else:
 						child_row = frappe._dict({
 							"posting_date": "",
@@ -151,7 +163,7 @@ def get_date(filters):
 							"item": trow.get("item"),
 							"qty": trow.get("qty"),
 							"rate": trow.get("rate"),
-							"amount": trow.get("amount"),
+							"amount": trow.get("qty") * trow.get("rate"),
 							"debit": "",
 							"credit":"",
 							"balance":""
@@ -162,6 +174,7 @@ def get_date(filters):
 					data.append(child_row)
 			else:
 				data.append(temp_row) 
+			print(closing_balance["balance"])
 	data.append(
 		frappe._dict({
 			"posting_date":"",
