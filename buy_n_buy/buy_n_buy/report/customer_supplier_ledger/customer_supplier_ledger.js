@@ -57,6 +57,12 @@ frappe.query_reports["Customer-Supplier Ledger"] = {
 				return party_type;
 			}
 		},
+		{
+			"fieldname":"include_supplier",
+			"label": __("Include Supplier"),
+			"fieldtype": "Check",
+			"default": 1,
+		}
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
