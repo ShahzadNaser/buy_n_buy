@@ -155,6 +155,7 @@ def get_data(filters):
 					if first:
 						child_row = temp_row
 						child_row.update(trow)
+						child_row["amount"] = (trow.get("qty") or 0) * (trow.get("rate") or 0)
 					else:
 						child_row = frappe._dict({
 							"posting_date": "",
