@@ -64,7 +64,7 @@ frappe.ui.form.on('Stock Entry', {
 frappe.ui.form.on('Stock Entry Detail', {
 	item_code: function(frm,cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
-        frm.events.update_item_details(item)
+        frm.events.update_item_details(item);
     },
     qty: function(frm, cdt, cdn){
 		var item = frappe.get_doc(cdt, cdn);
