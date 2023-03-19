@@ -12,7 +12,20 @@ def execute(filters=None):
 
 	return columns, data
 def get_data(filters):
-    frappe.db.sql(""" 
+	condition = " 1=1 "
+	if filters.get("posting_date"):
+		condition += " AND sle.posting_date <= '{}'".format(filters.get("posting_date"))
+
+	if filters.get("warehouse"):
+		condition += " AND sle.warehouse = '{}'".format(filters.get("warehouse"))
+
+	if filters.get("item_code"):
+		condition += " AND sle.item_code = '{}'".format(filters.get("item_code"))
+
+	if filters.get("item_group"):
+		condition += " AND item.item_group = '{}'".format(filters.get("item_group"))
+
+	return frappe.db.sql(""" 
 		SELECT 
 			sle.warehouse,
 			sle.item_code,
@@ -21,10 +34,11 @@ def get_data(filters):
 			sle.batch_no,
 			sle.company,
 			item.stock_uom,
-			SUM(sle.actual_qty) as actual,
+			SUM(sle.actual_qty) as bal_qty,
 			sle.incoming_rate,
 			sle.incoming_rate * SUM(sle.actual_qty) as stock_value,
-			ROUND(SUM(sle.actual_qty)/item_def.conversion_factor,3) as boxes,
+			item_def.conversion_factor as packing,
+			ROUND(SUM(sle.actual_qty)/item_def.conversion_factor,3) as ctn,
 			ROUND((item_def.cbm_1*item_def.cbm_2*item_def.cbm_3)*((SUM(sle.actual_qty)/item_def.conversion_factor)/1000000),3) as tcbm,
 			ROUND(item.weight_per_unit*SUM(sle.actual_qty)) as tw
 		FROM
@@ -37,11 +51,12 @@ def get_data(filters):
 			`tabUOM Conversion Detail` item_def
 			ON
 				sle.item_code = item_def.parent and item_def.uom = 'Box'
-
+		WHERE
+  			{}
 		GROUP BY sle.item_code , sle.warehouse
 
 		ORDER BY sle.item_code              
-	""",as_dict=True)
+	""".format(condition),as_dict=True,debug=True)
 
 
 def get_columns():
@@ -78,7 +93,7 @@ def get_columns():
   		{
 			"label": _("CTN"),
 			"fieldname": "ctn",
-			"fieldtype": "Int",
+			"fieldtype": "Float",
 			"width": 100,
 		},
 		{
@@ -111,7 +126,7 @@ def get_columns():
 		},
 		{
 			"label": _("Balance Value"),
-			"fieldname": "bal_val",
+			"fieldname": "stock_value",
 			"fieldtype": "Currency",
 			"width": 100,
 			"options": "currency",

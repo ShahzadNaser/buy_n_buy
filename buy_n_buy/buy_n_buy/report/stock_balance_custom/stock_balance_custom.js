@@ -13,16 +13,8 @@ frappe.query_reports["Stock Balance Custom"] = {
 			"default": frappe.defaults.get_default("company")
 		},
 		{
-			"fieldname":"from_date",
-			"label": __("From Date"),
-			"fieldtype": "Date",
-			"width": "80",
-			"reqd": 1,
-			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
-		},
-		{
-			"fieldname":"to_date",
-			"label": __("To Date"),
+			"fieldname":"posting_date",
+			"label": __("Posting Date"),
 			"fieldtype": "Date",
 			"width": "80",
 			"reqd": 1,
