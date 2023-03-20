@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Stock Balance Custom"] = {
+frappe.query_reports["stock_balance_extended"] = {
 	"filters": [
 		{
 			"fieldname": "company",
