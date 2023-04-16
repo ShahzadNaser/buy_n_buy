@@ -40,6 +40,13 @@ frappe.query_reports["Stock Balance Extended"] = {
 			}
 		},
 		{
+			"fieldname": "warehouse_type",
+			"label": __("Warehouse Type"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Warehouse Type"
+		},
+		{
 			"fieldname": "warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",

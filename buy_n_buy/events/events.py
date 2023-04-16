@@ -13,7 +13,7 @@ def get_item_details(item_code=None, warehouse=None):
         where += " and warehouse = '{}'".format(warehouse)
     result["actual_qty"] = 0
 
-    query_res = frappe.db.sql(""" SELECT SUM(actual_qty) as actual_qty from `tabBin` where %s """%where,as_dict=True,debug=True)
+    query_res = frappe.db.sql(""" SELECT SUM(actual_qty) as actual_qty from `tabBin` where %s """%where,as_dict=True)
     if query_res:
         result["actual_qty"] = query_res[0]["actual_qty"]
 

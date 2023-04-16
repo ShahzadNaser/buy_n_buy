@@ -1,3 +1,4 @@
+frappe.ui.form.handlers["Stock Entry Detail"]["item_code"] = [];
 frappe.ui.form.on('Stock Entry', {
     refresh(frm){
 
@@ -22,7 +23,7 @@ frappe.ui.form.on('Stock Entry', {
 				filters["is_return"] = 1;
 			}
 
-			if (item.warehouse) filters["warehouse"] = item.warehouse;
+			if (item.s_warehouse) filters["warehouse"] = item.s_warehouse;
 
 			return {
 				query : "erpnext.controllers.queries.get_batch_no",
@@ -63,8 +64,52 @@ frappe.ui.form.on('Stock Entry', {
 });
 frappe.ui.form.on('Stock Entry Detail', {
 	item_code: function(frm,cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-        frm.events.update_item_details(item);
+        var d = locals[cdt][cdn];
+        if(d.item_code) {
+            var args = {
+                'item_code'			: d.item_code,
+                'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
+                'transfer_qty'		: d.transfer_qty,
+                'serial_no'		: d.serial_no,
+                'batch_no'      : d.batch_no,
+                'bom_no'		: d.bom_no,
+                'expense_account'	: d.expense_account,
+                'cost_center'		: d.cost_center,
+                'company'		: frm.doc.company,
+                'qty'			: d.qty,
+                'voucher_type'		: frm.doc.doctype,
+                'voucher_no'		: d.name,
+                'allow_zero_valuation': 1,
+            };
+
+            return frappe.call({
+                doc: frm.doc,
+                method: "get_item_details",
+                args: args,
+                callback: function(r) {
+                    if(r.message) {
+                        var d = locals[cdt][cdn];
+                        $.each(r.message, function(k, v) {
+                            if (v) {
+                                frappe.model.set_value(cdt, cdn, k, v); // qty and it's subsequent fields weren't triggered
+                            }
+                        });
+                        refresh_field("items");
+
+                        let no_batch_serial_number_value = !d.serial_no;
+                        if (d.has_batch_no && !d.has_serial_no) {
+                            // check only batch_no for batched item
+                            no_batch_serial_number_value = !d.batch_no;
+                        }
+                        console.log("=============in======================");
+                        if (no_batch_serial_number_value && !frappe.flags.hide_serial_batch_dialog) {
+                            // erpnext.stock.select_batch_and_serial_no(frm, d);
+                        }
+                        frm.events.update_item_details(d);
+                    }
+                }
+            });
+        }
     },
     qty: function(frm, cdt, cdn){
 		var item = frappe.get_doc(cdt, cdn);

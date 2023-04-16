@@ -19,6 +19,10 @@ def get_data(filters):
 	if filters.get("warehouse"):
 		condition += " AND sle.warehouse = '{}'".format(filters.get("warehouse"))
 
+	if filters.get("warehouse_type"):
+		warehouses = frappe.db.get_all("Warehouse",{"warehouse_type":filters.get("warehouse_type")})
+		condition += " AND sle.warehouse in ({})".format(', '.join([frappe.db.escape(i.name, percent=False) for i in warehouses]))
+
 	if filters.get("item_code"):
 		condition += " AND sle.item_code = '{}'".format(filters.get("item_code"))
 
@@ -53,10 +57,10 @@ def get_data(filters):
 				sle.item_code = item_def.parent and item_def.uom = 'Box'
 		WHERE
   			{}
-		GROUP BY sle.item_code , sle.warehouse
+		GROUP BY sle.item_code , sle.warehouse, sle.batch_no
 
 		ORDER BY sle.item_code              
-	""".format(condition),as_dict=True,debug=True)
+	""".format(condition),as_dict=True)
 
 
 def get_columns():

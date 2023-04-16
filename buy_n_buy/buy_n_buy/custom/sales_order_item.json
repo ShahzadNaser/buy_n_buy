@@ -575,7 +575,7 @@
    "insert_after": "item_name",
    "is_system_generated": 0,
    "is_virtual": 0,
-   "label": "Delivery Warehouse",
+   "label": "Warehouse",
    "length": 0,
    "mandatory_depends_on": null,
    "modified": "2022-11-17 21:08:29.729190",
